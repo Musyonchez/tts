@@ -74,7 +74,8 @@ def main():
     )
 
     engine = pyttsx3.init()
-    # Optional: tweak rate/volume
+    voices = engine.getProperty("voices")
+    engine.setProperty("voice", voices[1].id)  # Zira
     engine.setProperty("rate", 175)   # words per minute
     engine.setProperty("volume", 1.0)
 
