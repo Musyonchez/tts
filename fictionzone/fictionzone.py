@@ -4,10 +4,10 @@ fictionzone.py — Save and read aloud a chapter from fictionzone.net
 Reads JSON copied to clipboard by the browser extension.
 
 Usage (PowerShell):
-    Get-Clipboard | venv\Scripts\python.exe fictionzone\fictionzone.py <save_dir>
+    Get-Clipboard | venv\Scripts\python.exe fictionzone\fictionzone.py
 
 Save path:
-    <save_dir>\content\<novel-slug>\chapter-XXXX.txt
+    fictionzone\content\<novel-slug>\chapter-XXXX.txt
 """
 
 import json
@@ -16,14 +16,17 @@ from pathlib import Path
 
 import pyttsx3
 
+# Save content next to this script: fictionzone/content/<novel>/<chapter>.txt
+CONTENT_DIR = Path(__file__).parent / "content"
 
-def save_chapter(save_dir: str, data: dict) -> Path:
+
+def save_chapter(data: dict) -> Path:
     novel_slug = data["novel_slug"]
     chapter_num = data["chapter_num"]
     chapter_title = data["chapter_title"]
     text = data["text"]
 
-    out_dir = Path(save_dir) / "content" / novel_slug
+    out_dir = CONTENT_DIR / novel_slug
     out_dir.mkdir(parents=True, exist_ok=True)
 
     filename = f"chapter-{chapter_num:04d}.txt"
@@ -53,14 +56,6 @@ def speak(chapter_title: str, text: str):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: fictionzone.py <save_dir>")
-        print("       Pipe clipboard JSON from the browser extension via stdin.")
-        print("       e.g.  Get-Clipboard | venv\\Scripts\\python.exe fictionzone\\fictionzone.py C:\\novels")
-        sys.exit(1)
-
-    save_dir = sys.argv[1]
-
     print("Reading JSON from stdin...")
     raw = sys.stdin.read().strip()
 
@@ -76,7 +71,7 @@ def main():
         print(f"ERROR: JSON missing fields: {missing}")
         sys.exit(1)
 
-    save_chapter(save_dir, data)
+    save_chapter(data)
     speak(data["chapter_title"], data["text"])
 
 
