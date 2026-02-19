@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "FictionZone Chapter Copier",
+  "version": "1.0",
+  "description": "Extracts chapter content from fictionzone.net and copies it to clipboard for TTS.",
+  "permissions": ["clipboardWrite", "activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["https://fictionzone.net/novel/*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {}
+}
