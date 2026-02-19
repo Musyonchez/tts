@@ -35,9 +35,10 @@ def read_file(engine, path: Path):
     print(f"\n--- {title} ---")
     print(f"({len(body.split())} words)")
     engine.say(title)
+    engine.runAndWait()
     for para in paragraphs:
         engine.say(para)
-    engine.runAndWait()
+        engine.runAndWait()
 
 
 def next_chapter(current: Path) -> Path | None:
