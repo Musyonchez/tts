@@ -13,18 +13,15 @@
   }
 
   function extractChapter() {
-    // Novel title → slug for folder name
     const novelEl = document.querySelector('span.novel-title');
     const novelTitle = novelEl ? novelEl.textContent.trim() : 'unknown-novel';
     const novelSlug = slugify(novelTitle);
 
-    // Chapter title
     const titleEl =
       document.querySelector('h1.chapter-article-title') ||
       document.querySelector('h1.chapter-title');
     const chapterTitle = titleEl ? titleEl.textContent.trim() : 'Unknown Chapter';
 
-    // Chapter number from progress "1 / 325"
     const progressEl = document.querySelector('span.chapter-progress');
     let chapterNum = 1;
     if (progressEl) {
@@ -32,11 +29,9 @@
       if (m) chapterNum = parseInt(m[1], 10);
     }
 
-    // Chapter text — paragraphs inside div.chapter-text, skip ads
     const contentDiv = document.querySelector('div.chapter-text');
     if (!contentDiv) return null;
 
-    // Remove ad slots from a clone so we don't mutate the page
     const clone = contentDiv.cloneNode(true);
     clone.querySelectorAll('div.ad-slot').forEach(el => el.remove());
 
@@ -81,7 +76,7 @@
   function createButton() {
     const btn = document.createElement('button');
     btn.id = 'fz-tts-btn';
-    btn.textContent = '📋 Copy for TTS';
+    btn.textContent = '💾 Save for TTS';
     Object.assign(btn.style, {
       position: 'fixed',
       bottom: '20px',
@@ -105,20 +100,13 @@
         return;
       }
 
-      const payload = JSON.stringify(data, null, 2);
-      navigator.clipboard.writeText(payload).then(() => {
-        showToast(`✅ Copied: ${data.chapter_title}`);
-      }).catch(() => {
-        // Fallback for older clipboard API
-        const ta = document.createElement('textarea');
-        ta.value = payload;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        ta.remove();
-        showToast(`✅ Copied: ${data.chapter_title}`);
+      const filename = `fictionzone-tts/chapter-${String(data.chapter_num).padStart(4, '0')}-${data.novel_slug}.json`;
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      chrome.runtime.sendMessage({ action: 'download', url, filename }, () => {
+        URL.revokeObjectURL(url);
+        showToast(`✅ Saved: ${data.chapter_title}`);
       });
     });
 

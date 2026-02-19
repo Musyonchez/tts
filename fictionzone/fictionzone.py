@@ -4,10 +4,10 @@ fictionzone.py — Save and read aloud a chapter from fictionzone.net
 Reads JSON copied to clipboard by the browser extension.
 
 Usage (PowerShell):
-    Get-Clipboard | venv\Scripts\python.exe fictionzone\fictionzone.py
+    Get-Clipboard | venv/Scripts/python.exe fictionzone/fictionzone.py
 
 Save path:
-    fictionzone\content\<novel-slug>\chapter-XXXX.txt
+    fictionzone/content/<novel-slug>/chapter-XXXX.txt
 """
 
 import json
