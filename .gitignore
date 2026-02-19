@@ -3,4 +3,5 @@ __pycache__/
 *.pyc
 *.msi
 *.log
-fictionzone/content/
+fictionzone/content/*/
+fictionzone/commands/*.txt
