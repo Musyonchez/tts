@@ -1,5 +1,4 @@
 import sys
-import re
 import requests
 import pyttsx3
 from bs4 import BeautifulSoup
@@ -70,13 +69,13 @@ def speak(engine: pyttsx3.Engine, title: str, text: str):
 
 def main():
     start_url = sys.argv[1] if len(sys.argv) > 1 else (
-        "https://freewebnovel.com/novel/beast-taming-abyssal-descent/chapter-1"
+        "https://freewebnovel.com/novel/beast-taming-abyssal-descent/chapter-108"
     )
 
     engine = pyttsx3.init()
     voices = engine.getProperty("voices")
     engine.setProperty("voice", voices[1].id)  # Zira
-    engine.setProperty("rate", 175)   # words per minute
+    engine.setProperty("rate", 450)   # words per minute
     engine.setProperty("volume", 1.0)
 
     url = start_url

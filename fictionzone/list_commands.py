@@ -4,13 +4,13 @@ list_commands.py — Generate ready-to-run command files for each novel in conte
 Output: fictionzone\commands\<novel-slug>.txt
 
 Run from the project root:
-    venv\Scripts\python.exe fictionzone\content\list_commands.py
+    venv\Scripts\python.exe fictionzone\list_commands.py
 """
 
 from pathlib import Path
 
-CONTENT_DIR = Path(__file__).parent          # fictionzone/content/
-COMMANDS_DIR = CONTENT_DIR.parent / "commands"  # fictionzone/commands/
+CONTENT_DIR = Path(__file__).parent / "content"
+COMMANDS_DIR = Path(__file__).parent / "commands"
 PREFIX = r"venv\Scripts\python.exe fictionzone\fictionzone.py"
 
 
