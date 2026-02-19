@@ -1,6 +1,6 @@
 # Web Novel TTS Reader
 
-Reads web novel chapters aloud using Windows built-in voices (SAPI via pyttsx3).
+Reads web novel chapters aloud using Windows built-in voices (SAPI).
 
 ## Setup
 
@@ -10,14 +10,14 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Scripts
+---
 
-### freewebnovel.py — auto-fetch & auto-advance
+## freewebnovel.py — auto-fetch & read
 
-Fetches chapters directly (no Cloudflare protection on that site) and auto-advances to the next chapter.
+Fetches chapters directly from freewebnovel.com (no Cloudflare) and auto-advances.
 
 ```bash
-# Start from chapter 1 (default)
+# Start from a default chapter
 venv\Scripts\python.exe freewebnovel.py
 
 # Start from a specific chapter
@@ -26,43 +26,60 @@ venv\Scripts\python.exe freewebnovel.py https://freewebnovel.com/novel/beast-tam
 
 ---
 
-### fictionzone/fictionzone.py — paste HTML, save & read
+## fictionzone/ — extension + collect + read
 
-fictionzone.net is Cloudflare-protected, so you copy the page body HTML manually
-via a browser extension, then pipe it in.
+fictionzone.net is Cloudflare-protected, so content is saved via a browser extension.
 
-**Steps:**
-1. Open the chapter in your browser
-2. Use a browser extension (e.g. *Copy HTML* / *SelectAll + Copy Outer HTML*) to copy the full `<body>` HTML
-3. Run one of the commands below
+### Workflow
 
-```powershell
-# Pipe from clipboard (PowerShell)
-Get-Clipboard | venv\Scripts\python.exe fictionzone\fictionzone.py C:\path\to\save
+**1. Save chapters in browser**
 
-# Or from a saved HTML file
-venv\Scripts\python.exe fictionzone\fictionzone.py C:\path\to\save chapter.html
+Load the Brave extension from `fictionzone/extension/` (developer mode).
+On any chapter page, click **"💾 Save for TTS"** — saves a JSON file to:
+```
+Downloads\fictionzone-tts\
+```
+> Tip: turn off *"Ask where to save each file before downloading"* in `brave://settings/downloads` while batch-saving, then turn it back on.
+
+**2. Collect into content folder**
+
+```bash
+venv\Scripts\python.exe fictionzone\collect.py
 ```
 
-Chapters are saved to:
+Moves JSONs to `fictionzone\content\<novel>\chapter-XXXX.txt` and archives originals to `Downloads\fictionzone-tts\processed\`.
+
+**3. Generate run commands**
+
+```bash
+venv\Scripts\python.exe fictionzone\list_commands.py
 ```
-<save_dir>\content\<novel-name>\chapter-XXXX.txt
+
+Writes ready-to-run commands to `fictionzone\commands\<novel>.txt`.
+
+**4. Read chapters aloud**
+
+```bash
+# Read whole novel from chapter 1
+venv\Scripts\python.exe fictionzone\fictionzone.py fictionzone\content\<novel>
+
+# Start from a specific chapter
+venv\Scripts\python.exe fictionzone\fictionzone.py fictionzone\content\<novel>\chapter-0005.txt
 ```
 
 ---
 
 ## Customise voice / speed
 
-Edit the settings in `main()` / `speak()` in the relevant script:
-
+**freewebnovel.py** (pyttsx3):
 ```python
 engine.setProperty("voice", voices[1].id)  # 0 = David, 1 = Zira
-engine.setProperty("rate", 175)            # words per minute
+engine.setProperty("rate", 450)            # words per minute
 engine.setProperty("volume", 1.0)          # 0.0 – 1.0
 ```
 
-List available voices:
-
-```bash
-venv\Scripts\python.exe -c "import pyttsx3; e=pyttsx3.init(); [print(i, v.name) for i,v in enumerate(e.getProperty('voices'))]"
+**fictionzone/fictionzone.py** (win32com SAPI):
+```python
+RATE = 6      # -10 (slowest) to 10 (fastest), 0 ≈ 180 wpm
+VOLUME = 100  # 0–100
 ```
