@@ -12,33 +12,39 @@ Usage:
 import sys
 from pathlib import Path
 
-import pyttsx3
+import win32com.client
 
 CONTENT_DIR = Path(__file__).parent / "content"
 
-
-def get_engine():
-    engine = pyttsx3.init()
-    voices = engine.getProperty("voices")
-    engine.setProperty("voice", voices[1].id)  # Zira
-    engine.setProperty("rate", 450)
-    engine.setProperty("volume", 1.0)
-    return engine
+# SAPI rate: -10 (slowest) to 10 (fastest), 0 = ~180 wpm
+RATE = 6
+VOLUME = 100  # 0-100
 
 
-def read_file(engine, path: Path):
+def get_speaker():
+    speaker = win32com.client.Dispatch("SAPI.SpVoice")
+    # Find Zira
+    voices = speaker.GetVoices()
+    for i in range(voices.Count):
+        if "Zira" in voices.Item(i).GetDescription():
+            speaker.Voice = voices.Item(i)
+            break
+    speaker.Rate = RATE
+    speaker.Volume = VOLUME
+    return speaker
+
+
+def read_file(speaker, path: Path):
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
     title = lines[0].strip() if lines else path.stem
     body = "\n".join(lines[3:]).strip()  # skip title + === separator + blank line
     paragraphs = [p.strip() for p in body.split("\n\n") if p.strip()]
     print(f"\n--- {title} ---")
-    print(f"({len(body.split())} words)")
-    engine.say(title)
-    engine.runAndWait()
+    print(f"({len(body.split())} words, {len(paragraphs)} paragraphs)")
+    speaker.Speak(title)
     for para in paragraphs:
-        engine.say(para)
-        engine.runAndWait()
+        speaker.Speak(para)
 
 
 def next_chapter(current: Path) -> Path | None:
@@ -58,7 +64,6 @@ def main():
 
     target = Path(sys.argv[1])
 
-    # If a folder is given, start from the first chapter in it
     if target.is_dir():
         chapters = sorted(target.glob("chapter-*.txt"))
         if not chapters:
@@ -72,10 +77,10 @@ def main():
         print(f"File not found: {current}")
         sys.exit(1)
 
-    engine = get_engine()
+    speaker = get_speaker()
 
     while current:
-        read_file(engine, current)
+        read_file(speaker, current)
         nxt = next_chapter(current)
         if nxt:
             print(f"Next: {nxt.name}")
