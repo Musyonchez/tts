@@ -1,78 +1,84 @@
 """
-fictionzone.py — Save and read aloud a chapter from fictionzone.net
+fictionzone.py — Read saved chapter files aloud, auto-advancing to the next.
 
-Reads JSON copied to clipboard by the browser extension.
+Usage:
+    # Read a specific chapter file and continue from there:
+    venv\Scripts\python.exe fictionzone\fictionzone.py fictionzone\content\<novel>\chapter-0001.txt
 
-Usage (PowerShell):
-    Get-Clipboard | venv/Scripts/python.exe fictionzone/fictionzone.py
-
-Save path:
-    fictionzone/content/<novel-slug>/chapter-XXXX.txt
+    # Or just the novel folder — starts from the first chapter:
+    venv\Scripts\python.exe fictionzone\fictionzone.py fictionzone\content\<novel>
 """
 
-import json
 import sys
 from pathlib import Path
 
 import pyttsx3
 
-# Save content next to this script: fictionzone/content/<novel>/<chapter>.txt
 CONTENT_DIR = Path(__file__).parent / "content"
 
 
-def save_chapter(data: dict) -> Path:
-    novel_slug = data["novel_slug"]
-    chapter_num = data["chapter_num"]
-    chapter_title = data["chapter_title"]
-    text = data["text"]
-
-    out_dir = CONTENT_DIR / novel_slug
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    filename = f"chapter-{chapter_num:04d}.txt"
-    out_path = out_dir / filename
-
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(f"{chapter_title}\n{'=' * len(chapter_title)}\n\n")
-        f.write(text)
-
-    print(f"Saved: {out_path}")
-    return out_path
-
-
-def speak(chapter_title: str, text: str):
+def get_engine():
     engine = pyttsx3.init()
     voices = engine.getProperty("voices")
     engine.setProperty("voice", voices[1].id)  # Zira
     engine.setProperty("rate", 450)
     engine.setProperty("volume", 1.0)
+    return engine
 
-    word_count = len(text.split())
-    print(f"Reading '{chapter_title}' ({word_count} words)...")
 
-    engine.say(chapter_title)
-    engine.say(text)
+def read_file(engine, path: Path):
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    title = lines[0].strip() if lines else path.stem
+    body = "\n".join(lines[3:]).strip()  # skip title + === separator + blank line
+    print(f"\n--- {title} ---")
+    print(f"({len(body.split())} words)")
+    engine.say(title)
+    engine.say(body)
     engine.runAndWait()
 
 
-def main():
-    print("Reading JSON from stdin...")
-    raw = sys.stdin.read().strip()
-
+def next_chapter(current: Path) -> Path | None:
+    siblings = sorted(current.parent.glob("chapter-*.txt"))
     try:
-        data = json.loads(raw)
-    except json.JSONDecodeError as e:
-        print(f"ERROR: Could not parse JSON — {e}")
+        idx = siblings.index(current)
+        return siblings[idx + 1] if idx + 1 < len(siblings) else None
+    except ValueError:
+        return None
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: fictionzone.py <chapter.txt | novel-folder>")
+        print(f"Content is in: {CONTENT_DIR}")
         sys.exit(1)
 
-    required = {"novel_slug", "chapter_num", "chapter_title", "text"}
-    missing = required - data.keys()
-    if missing:
-        print(f"ERROR: JSON missing fields: {missing}")
+    target = Path(sys.argv[1])
+
+    # If a folder is given, start from the first chapter in it
+    if target.is_dir():
+        chapters = sorted(target.glob("chapter-*.txt"))
+        if not chapters:
+            print(f"No chapter files found in {target}")
+            sys.exit(1)
+        current = chapters[0]
+    else:
+        current = target
+
+    if not current.exists():
+        print(f"File not found: {current}")
         sys.exit(1)
 
-    save_chapter(data)
-    speak(data["chapter_title"], data["text"])
+    engine = get_engine()
+
+    while current:
+        read_file(engine, current)
+        nxt = next_chapter(current)
+        if nxt:
+            print(f"Next: {nxt.name}")
+        current = nxt
+
+    print("\nNo more chapters.")
 
 
 if __name__ == "__main__":
