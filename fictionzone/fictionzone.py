@@ -31,10 +31,12 @@ def read_file(engine, path: Path):
     lines = text.splitlines()
     title = lines[0].strip() if lines else path.stem
     body = "\n".join(lines[3:]).strip()  # skip title + === separator + blank line
+    paragraphs = [p.strip() for p in body.split("\n\n") if p.strip()]
     print(f"\n--- {title} ---")
     print(f"({len(body.split())} words)")
     engine.say(title)
-    engine.say(body)
+    for para in paragraphs:
+        engine.say(para)
     engine.runAndWait()
 
 
