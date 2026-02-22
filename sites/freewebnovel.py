@@ -69,7 +69,7 @@ def speak(engine: pyttsx3.Engine, title: str, text: str):
 
 def main():
     start_url = sys.argv[1] if len(sys.argv) > 1 else (
-        "https://freewebnovel.com/novel/beast-taming-abyssal-descent/chapter-108"
+        "https://freewebnovel.com/novel/wizard-start-with-biological-transformation-to-grind-experience/chapter-16"
     )
 
     engine = pyttsx3.init()

@@ -18,10 +18,10 @@ Fetches chapters directly from freewebnovel.com (no Cloudflare) and auto-advance
 
 ```bash
 # Start from a default chapter
-venv\Scripts\python.exe freewebnovel.py
+venv\Scripts\python.exe sites\freewebnovel.py
 
 # Start from a specific chapter
-venv\Scripts\python.exe freewebnovel.py https://freewebnovel.com/novel/beast-taming-abyssal-descent/chapter-5
+venv\Scripts\python.exe sites\freewebnovel.py https://freewebnovel.com/novel/beast-taming-abyssal-descent/chapter-5
 ```
 
 ---
