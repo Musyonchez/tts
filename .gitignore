@@ -5,3 +5,5 @@ __pycache__/
 *.log
 fictionzone/content/*/
 fictionzone/commands/*.txt
+novelhall/content/*/
+novelhall/commands/*.txt

@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "NovelHall Chapter Saver",
+  "version": "1.0",
+  "permissions": ["downloads", "activeTab"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": ["https://www.novelhall.com/*/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }],
+  "icons": {}
+}
