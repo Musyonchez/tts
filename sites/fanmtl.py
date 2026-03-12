@@ -1,6 +1,6 @@
 import sys
 import requests
-import pyttsx3
+import win32com.client
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
@@ -55,12 +55,11 @@ def find_next_url(soup: BeautifulSoup) -> str | None:
     return None
 
 
-def speak(engine: pyttsx3.Engine, title: str, text: str):
+def speak(speaker, title: str, text: str):
     print(f"\n--- {title} ---")
     print(f"Reading {len(text.split())} words...\n")
-    engine.say(title)
-    engine.say(text)
-    engine.runAndWait()
+    speaker.Speak(title)
+    speaker.Speak(text)
 
 
 def main():
@@ -68,11 +67,14 @@ def main():
         "https://www.fanmtl.com/novel/ke407980_1.html"
     )
 
-    engine = pyttsx3.init()
-    voices = engine.getProperty("voices")
-    engine.setProperty("voice", voices[1].id)  # Zira
-    engine.setProperty("rate", 450)
-    engine.setProperty("volume", 1.0)
+    speaker = win32com.client.Dispatch("SAPI.SpVoice")
+    voices = speaker.GetVoices()
+    for i in range(voices.Count):
+        if "Zira" in voices.Item(i).GetDescription():
+            speaker.Voice = voices.Item(i)
+            break
+    speaker.Rate = 6      # SAPI rate: -10 to 10, 0 ≈ 180 wpm
+    speaker.Volume = 100  # 0-100
 
     url = start_url
     while url:
@@ -83,7 +85,7 @@ def main():
             print("No content found — stopping.")
             break
 
-        speak(engine, title, text)
+        speak(speaker, title, text)
 
         next_url = find_next_url(soup)
         if not next_url or next_url == url:
