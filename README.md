@@ -71,14 +71,8 @@ venv\Scripts\python.exe fictionzone\fictionzone.py fictionzone\content\<novel>\c
 
 ## Customise voice / speed
 
-**freewebnovel.py** (pyttsx3):
-```python
-engine.setProperty("voice", voices[1].id)  # 0 = David, 1 = Zira
-engine.setProperty("rate", 450)            # words per minute
-engine.setProperty("volume", 1.0)          # 0.0 – 1.0
-```
+All scripts use win32com SAPI. Edit the `RATE` and `VOLUME` variables (or in `main()` for sites scripts):
 
-**fictionzone/fictionzone.py** (win32com SAPI):
 ```python
 RATE = 6      # -10 (slowest) to 10 (fastest), 0 ≈ 180 wpm
 VOLUME = 100  # 0–100
