@@ -17,7 +17,7 @@ import win32com.client
 CONTENT_DIR = Path(__file__).parent / "content"
 
 # SAPI rate: -10 (slowest) to 10 (fastest), 0 = ~180 wpm
-RATE = 6
+RATE = 10
 VOLUME = 100  # 0-100
 
 

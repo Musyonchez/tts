@@ -64,7 +64,7 @@ def speak(speaker, title: str, text: str):
 
 def main():
     start_url = sys.argv[1] if len(sys.argv) > 1 else (
-        "https://www.wuxiabox.com/novel/6984513_1.html"
+        "https://www.wuxiabox.com/novel/douluo-dalu_33.html"
     )
 
     speaker = win32com.client.Dispatch("SAPI.SpVoice")
@@ -73,7 +73,7 @@ def main():
         if "Zira" in voices.Item(i).GetDescription():
             speaker.Voice = voices.Item(i)
             break
-    speaker.Rate = 6      # SAPI rate: -10 to 10, 0 ≈ 180 wpm
+    speaker.Rate = 10      # SAPI rate: -10 to 10, 0 ≈ 180 wpm
     speaker.Volume = 100  # 0-100
 
     url = start_url
