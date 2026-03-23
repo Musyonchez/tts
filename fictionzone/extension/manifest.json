@@ -9,7 +9,10 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://fictionzone.net/novel/*/*"],
+      "matches": [
+        "https://fictionzone.net/novel/*/*",
+        "https://fictionzone.net/omniportal/fq/*/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
