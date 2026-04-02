@@ -15,7 +15,7 @@ SUPPORTED_SITES = list(_SITE_MAP.keys())
 
 
 def site_for_url(url: str) -> BaseSite | None:
-    host = urlparse(url).netloc.lstrip("www.")
+    host = urlparse(url).netloc.removeprefix("www.")
     for domain, cls in _SITE_MAP.items():
         if domain in host:
             return cls()
