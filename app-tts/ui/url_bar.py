@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt, pyqtSignal
+import qtawesome as qta
+from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
 
 from sites import SUPPORTED_SITES
@@ -23,7 +24,9 @@ class UrlBar(QWidget):
         layout.setSpacing(8)
 
         # Sidebar toggle
-        self._sidebar_btn = QPushButton("☰")
+        self._sidebar_btn = QPushButton()
+        self._sidebar_btn.setIcon(qta.icon("fa5s.book-open", color="#cdd6f4"))
+        self._sidebar_btn.setIconSize(QSize(16, 16))
         self._sidebar_btn.setFixedSize(36, 36)
         self._sidebar_btn.setToolTip("Toggle library sidebar")
         self._sidebar_btn.clicked.connect(self.sidebar_toggled)

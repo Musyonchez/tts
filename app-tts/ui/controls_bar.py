@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt, pyqtSignal
+import qtawesome as qta
+from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -11,6 +12,9 @@ from PyQt6.QtWidgets import (
     QSlider,
     QWidget,
 )
+
+_ICON_COLOR = "#cdd6f4"
+_ICON_COLOR_ACCENT = "#1e1e2e"
 
 
 class ControlsBar(QWidget):
@@ -34,27 +38,38 @@ class ControlsBar(QWidget):
         layout.setContentsMargins(16, 8, 16, 8)
         layout.setSpacing(8)
 
+        ico_sz = QSize(16, 16)
+
         # Prev
-        self._prev_btn = QPushButton("⏮")
+        self._prev_btn = QPushButton()
+        self._prev_btn.setIcon(qta.icon("fa5s.step-backward", color=_ICON_COLOR))
+        self._prev_btn.setIconSize(ico_sz)
         self._prev_btn.setFixedSize(36, 36)
         self._prev_btn.setToolTip("Previous chapter")
         self._prev_btn.clicked.connect(self.prev_clicked)
 
         # Play/Pause
-        self._play_btn = QPushButton("▶  Play")
+        self._play_btn = QPushButton()
+        self._play_btn.setIcon(qta.icon("fa5s.play", color=_ICON_COLOR_ACCENT))
+        self._play_btn.setIconSize(ico_sz)
+        self._play_btn.setText("  Play")
         self._play_btn.setObjectName("playBtn")
         self._play_btn.setFixedHeight(36)
         self._play_btn.setToolTip("Play / Pause")
         self._play_btn.clicked.connect(self._on_play_pause)
 
         # Stop
-        self._stop_btn = QPushButton("⏹")
+        self._stop_btn = QPushButton()
+        self._stop_btn.setIcon(qta.icon("fa5s.stop", color=_ICON_COLOR))
+        self._stop_btn.setIconSize(ico_sz)
         self._stop_btn.setFixedSize(36, 36)
         self._stop_btn.setToolTip("Stop")
         self._stop_btn.clicked.connect(self.stop_clicked)
 
         # Next
-        self._next_btn = QPushButton("⏭")
+        self._next_btn = QPushButton()
+        self._next_btn.setIcon(qta.icon("fa5s.step-forward", color=_ICON_COLOR))
+        self._next_btn.setIconSize(ico_sz)
         self._next_btn.setFixedSize(36, 36)
         self._next_btn.setToolTip("Next chapter")
         self._next_btn.clicked.connect(self.next_clicked)
@@ -135,9 +150,11 @@ class ControlsBar(QWidget):
     def set_playing(self, playing: bool) -> None:
         self._playing = playing
         if playing:
-            self._play_btn.setText("⏸  Pause")
+            self._play_btn.setIcon(qta.icon("fa5s.pause", color=_ICON_COLOR_ACCENT))
+            self._play_btn.setText("  Pause")
         else:
-            self._play_btn.setText("▶  Play")
+            self._play_btn.setIcon(qta.icon("fa5s.play", color=_ICON_COLOR_ACCENT))
+            self._play_btn.setText("  Play")
 
     def set_progress(self, current: int, total: int) -> None:
         if total > 0:
