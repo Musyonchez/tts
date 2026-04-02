@@ -31,6 +31,7 @@ from sites import site_for_url
 from .controls_bar import ControlsBar
 from .reader_panel import ReaderPanel
 from .sidebar import LibrarySidebar
+from .toast import Toast
 from .url_bar import UrlBar
 
 
@@ -109,6 +110,9 @@ class MainWindow(QMainWindow):
         self._controls = ControlsBar()
         root.addWidget(self._controls)
 
+        # Floating toast — child of central widget so it overlaps everything
+        self._toast = Toast(central)
+
     def _wire_signals(self) -> None:
         # URL bar
         self._url_bar.go_requested.connect(self._on_go)
@@ -134,7 +138,7 @@ class MainWindow(QMainWindow):
     def _on_go(self, url: str) -> None:
         site = site_for_url(url)
         if site is None:
-            self._url_bar.set_status("Unsupported site.", error=True)
+            self._toast.show_message("Unsupported site.", error=True)
             return
 
         self._stop_worker()
@@ -148,7 +152,7 @@ class MainWindow(QMainWindow):
 
     def _on_chapter_ready_web(self, title: str, paragraphs: list, next_url: str, prev_url: str) -> None:
         self._url_bar.set_fetching(False)
-        self._url_bar.set_status(f"Loaded: {title[:60]}")
+        self._toast.show_message(f"Loaded: {title[:60]}")
         self._next_url = next_url
         self._prev_url = prev_url
         self._current_chapter_path = None
@@ -157,7 +161,7 @@ class MainWindow(QMainWindow):
 
     def _on_fetch_error(self, msg: str) -> None:
         self._url_bar.set_fetching(False)
-        self._url_bar.set_status(msg[:80], error=True)
+        self._toast.show_message(msg[:80], error=True)
 
     # ------------------------------------------------------------------
     # Offline library workflow
@@ -172,7 +176,7 @@ class MainWindow(QMainWindow):
         self._next_url = ""
         self._prev_url = ""
         self._url_bar.set_url("")
-        self._url_bar.set_status(f"Offline: {title[:60]}")
+        self._toast.show_message(f"Offline: {title[:60]}")
         self._load_chapter(title, paragraphs)
         self._start_worker()
         self._sidebar.highlight_chapter(ch.path)
@@ -308,11 +312,11 @@ class MainWindow(QMainWindow):
             self._on_go(self._next_url)
             return
 
-        self._url_bar.set_status("Finished — no more chapters.")
+        self._toast.show_message("Finished — no more chapters.")
 
     def _on_tts_error(self, msg: str) -> None:
         self._controls.set_playing(False)
-        self._url_bar.set_status(f"TTS error: {msg[:80]}", error=True)
+        self._toast.show_message(f"TTS error: {msg[:80]}", error=True)
 
     # ------------------------------------------------------------------
     # Bookmarks
@@ -346,6 +350,10 @@ class MainWindow(QMainWindow):
             has_prev = bool(self._prev_url)
             has_next = bool(self._next_url)
         self._controls.set_chapter_nav_enabled(has_prev, has_next)
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self._toast.reposition()
 
     def closeEvent(self, event) -> None:
         self._save_current_bookmark()
