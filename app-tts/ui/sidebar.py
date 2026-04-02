@@ -75,8 +75,21 @@ class LibrarySidebar(QWidget):
 
     def refresh(self) -> None:
         source = self._source_combo.currentText()
-        # Re-read bookmarks for current novels
+        prev_slug = self._current_novel.slug if self._current_novel else None
         self._novels = list_novels(source)
+
+        # Rebuild novel list, restore selection if possible
+        self._novel_list.clear()
+        self._current_novel = None
+        for novel in self._novels:
+            item = QListWidgetItem(novel.display_name)
+            item.setData(Qt.ItemDataRole.UserRole, novel)
+            item.setToolTip(f"{novel.chapter_count} chapters")
+            self._novel_list.addItem(item)
+            if novel.slug == prev_slug:
+                self._novel_list.setCurrentItem(item)
+                self._current_novel = novel
+
         self._refresh_chapter_list()
 
     def _on_novel_selected(self, current: QListWidgetItem | None, _prev) -> None:

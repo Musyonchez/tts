@@ -13,6 +13,7 @@ class UrlBar(QWidget):
     go_requested = pyqtSignal(str)       # url
     sidebar_toggled = pyqtSignal()
     collect_requested = pyqtSignal()
+    refresh_requested = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -50,10 +51,19 @@ class UrlBar(QWidget):
         self._collect_btn.setToolTip("Import downloaded chapters from fictionzone-tts / novelhall-tts in Downloads")
         self._collect_btn.clicked.connect(self.collect_requested)
 
+        # Refresh button
+        self._refresh_btn = QPushButton()
+        self._refresh_btn.setIcon(qta.icon("fa5s.sync-alt", color="#cdd6f4"))
+        self._refresh_btn.setIconSize(QSize(16, 16))
+        self._refresh_btn.setFixedSize(36, 36)
+        self._refresh_btn.setToolTip("Refresh library")
+        self._refresh_btn.clicked.connect(self.refresh_requested)
+
         layout.addWidget(self._sidebar_btn)
         layout.addWidget(self._url_edit, stretch=1)
         layout.addWidget(self._go_btn)
         layout.addWidget(self._collect_btn)
+        layout.addWidget(self._refresh_btn)
 
     def _on_go(self) -> None:
         url = self._url_edit.text().strip()

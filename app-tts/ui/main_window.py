@@ -120,6 +120,7 @@ class MainWindow(QMainWindow):
         self._url_bar.go_requested.connect(self._on_go)
         self._url_bar.sidebar_toggled.connect(self._toggle_sidebar)
         self._url_bar.collect_requested.connect(self._on_collect)
+        self._url_bar.refresh_requested.connect(self._sidebar.refresh)
 
         # Controls
         self._controls.play_clicked.connect(self._on_play)
