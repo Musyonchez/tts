@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
         self._paragraphs: list[str] = []
         self._current_para_idx = 0
         self._next_url = ""
+        self._prev_url = ""
         self._current_url = ""
         self._current_chapter_path: Path | None = None
         self._current_novel_source: str = ""
@@ -145,10 +146,11 @@ class MainWindow(QMainWindow):
         self._fetcher.fetch_error.connect(self._on_fetch_error)
         self._fetcher.start()
 
-    def _on_chapter_ready_web(self, title: str, paragraphs: list, next_url: str) -> None:
+    def _on_chapter_ready_web(self, title: str, paragraphs: list, next_url: str, prev_url: str) -> None:
         self._url_bar.set_fetching(False)
         self._url_bar.set_status(f"Loaded: {title[:60]}")
         self._next_url = next_url
+        self._prev_url = prev_url
         self._current_chapter_path = None
         self._load_chapter(title, paragraphs)
         self._start_worker()
@@ -168,6 +170,7 @@ class MainWindow(QMainWindow):
         self._current_novel_source = self._sidebar._source_combo.currentText()
         self._current_novel_slug = ch.path.parent.name
         self._next_url = ""
+        self._prev_url = ""
         self._url_bar.set_url("")
         self._url_bar.set_status(f"Offline: {title[:60]}")
         self._load_chapter(title, paragraphs)
@@ -259,9 +262,9 @@ class MainWindow(QMainWindow):
             prev = prev_chapter(self._current_chapter_path)
             if prev:
                 self._on_offline_chapter_selected(_make_chapter_info(prev))
-        elif self._current_url:
-            # Web: can't go back (no prev URL tracked), just restart current
-            self._on_go(self._current_url)
+        elif self._prev_url:
+            self._url_bar.set_url(self._prev_url)
+            self._on_go(self._prev_url)
 
     def _on_next_chapter(self) -> None:
         if self._current_chapter_path:
@@ -339,8 +342,9 @@ class MainWindow(QMainWindow):
         if self._current_chapter_path:
             has_prev = prev_chapter(self._current_chapter_path) is not None
             has_next = next_chapter(self._current_chapter_path) is not None
-        elif self._next_url:
-            has_next = True
+        elif self._current_url:
+            has_prev = bool(self._prev_url)
+            has_next = bool(self._next_url)
         self._controls.set_chapter_nav_enabled(has_prev, has_next)
 
     def closeEvent(self, event) -> None:

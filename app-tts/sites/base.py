@@ -30,6 +30,9 @@ class BaseSite(ABC):
     def find_next_url(self, soup: BeautifulSoup, current_url: str = "") -> str | None:
         ...
 
+    def find_prev_url(self, soup: BeautifulSoup, current_url: str = "") -> str | None:
+        return None
+
     def _clean_content_div(self, content_div) -> str:
         for tag in content_div.select("script, style, ins, .ads, [class*='adv']"):
             tag.decompose()

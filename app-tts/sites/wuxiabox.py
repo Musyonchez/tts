@@ -34,3 +34,14 @@ class WuxiaBox(BaseSite):
                     if next_url != current_url:
                         return next_url
         return None
+
+    def find_prev_url(self, soup: BeautifulSoup, current_url: str = "") -> str | None:
+        for a in soup.select("a"):
+            label = a.get_text(strip=True).lower()
+            if "prev" in label:
+                href = a.get("href", "")
+                if href and "_" in href and href.endswith(".html"):
+                    prev_url = urljoin(self.BASE_URL, href)
+                    if prev_url != current_url:
+                        return prev_url
+        return None
