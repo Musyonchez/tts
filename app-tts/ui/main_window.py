@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from core.collector import CollectorThread
 from core.fetcher import FetcherThread
 from core.library import (
     ChapterInfo,
@@ -53,6 +54,7 @@ class MainWindow(QMainWindow):
         self._current_novel_slug: str = ""
         self._worker: TTSWorker | None = None
         self._fetcher: FetcherThread | None = None
+        self._collector: CollectorThread | None = None
         self._voices = get_available_voices()
 
         self._build_ui()
@@ -117,6 +119,7 @@ class MainWindow(QMainWindow):
         # URL bar
         self._url_bar.go_requested.connect(self._on_go)
         self._url_bar.sidebar_toggled.connect(self._toggle_sidebar)
+        self._url_bar.collect_requested.connect(self._on_collect)
 
         # Controls
         self._controls.play_clicked.connect(self._on_play)
@@ -161,6 +164,24 @@ class MainWindow(QMainWindow):
         self._current_chapter_path = None
         self._load_chapter(title, paragraphs)
         self._start_worker()
+
+    def _on_collect(self) -> None:
+        if self._collector and self._collector.isRunning():
+            return
+        self._url_bar._collect_btn.setEnabled(False)
+        self._url_bar._collect_btn.setText("...")
+        self._collector = CollectorThread()
+        self._collector.finished.connect(self._on_collect_done)
+        self._collector.start()
+
+    def _on_collect_done(self, total: int) -> None:
+        self._url_bar._collect_btn.setEnabled(True)
+        self._url_bar._collect_btn.setText("Collect")
+        if total:
+            self._toast.show_message(f"Collected {total} chapter(s).")
+            self._sidebar.refresh()
+        else:
+            self._toast.show_message("No new chapters found in Downloads.")
 
     def _on_fetch_error(self, msg: str) -> None:
         self._url_bar.set_fetching(False)

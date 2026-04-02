@@ -12,6 +12,7 @@ from sites import SUPPORTED_SITES
 class UrlBar(QWidget):
     go_requested = pyqtSignal(str)       # url
     sidebar_toggled = pyqtSignal()
+    collect_requested = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -43,9 +44,16 @@ class UrlBar(QWidget):
         self._go_btn.setFixedHeight(36)
         self._go_btn.clicked.connect(self._on_go)
 
+        # Collect button
+        self._collect_btn = QPushButton("Collect")
+        self._collect_btn.setFixedHeight(36)
+        self._collect_btn.setToolTip("Import downloaded chapters from fictionzone-tts / novelhall-tts in Downloads")
+        self._collect_btn.clicked.connect(self.collect_requested)
+
         layout.addWidget(self._sidebar_btn)
         layout.addWidget(self._url_edit, stretch=1)
         layout.addWidget(self._go_btn)
+        layout.addWidget(self._collect_btn)
 
     def _on_go(self) -> None:
         url = self._url_edit.text().strip()
