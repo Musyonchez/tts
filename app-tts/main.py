@@ -13,13 +13,14 @@ except ImportError:
     sys.exit(1)
 
 try:
-    import win32com.client  # noqa: F401
-except ImportError:
+    import winrt._winrt  # noqa: F401
+    import sounddevice  # noqa: F401
+except ImportError as exc:
     app = QApplication(sys.argv)
     QMessageBox.critical(
         None,
         "Missing dependency",
-        "pywin32 is required for speech synthesis.\n\nRun: pip install pywin32",
+        f"Required package missing: {exc}\n\nRun: pip install -r requirements.txt",
     )
     sys.exit(1)
 

@@ -213,7 +213,10 @@ class MainWindow(QMainWindow):
         for name in self._voices:
             if "zira" in name.lower():
                 return name
-        return self._voices[0] if self._voices else "Zira"
+        for name in self._voices:
+            if "en-us" in name.lower():
+                return name
+        return self._voices[0] if self._voices else ""
 
     # ------------------------------------------------------------------
     # Controls callbacks
