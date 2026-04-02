@@ -17,6 +17,7 @@ SOURCES: dict[str, Path] = {
 }
 
 _BOOKMARKS_FILE = _APP_DIR / "data" / "bookmarks.json"
+_SETTINGS_FILE = _APP_DIR / "data" / "settings.json"
 
 
 @dataclass
@@ -162,3 +163,21 @@ def load_web_bookmark(url: str) -> dict | None:
     parsed = urlparse(url)
     key = f"web/{parsed.netloc}{parsed.path}"
     return _load_bookmark(key)
+
+
+# ------------------------------------------------------------------
+# Settings persistence
+# ------------------------------------------------------------------
+
+def load_settings() -> dict:
+    try:
+        return json.loads(_SETTINGS_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def save_settings(data: dict) -> None:
+    _SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    existing = load_settings()
+    existing.update(data)
+    _SETTINGS_FILE.write_text(json.dumps(existing, indent=2), encoding="utf-8")

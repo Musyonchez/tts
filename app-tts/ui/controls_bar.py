@@ -5,6 +5,7 @@ from __future__ import annotations
 import qtawesome as qta
 from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtWidgets import (
+    QComboBox,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -26,6 +27,7 @@ class ControlsBar(QWidget):
     next_clicked = pyqtSignal()
     rate_changed = pyqtSignal(int)     # -10..10
     volume_changed = pyqtSignal(int)   # 0..100
+    voice_changed = pyqtSignal(str)    # voice display name
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -108,6 +110,19 @@ class ControlsBar(QWidget):
         self._vol_val_label.setFixedWidth(28)
         self._vol_slider.valueChanged.connect(self._on_volume_changed)
 
+        # Separator
+        sep3 = QFrame()
+        sep3.setFrameShape(QFrame.Shape.VLine)
+        sep3.setFixedHeight(30)
+
+        # Voice selector
+        voice_label = QLabel("Voice")
+        voice_label.setFixedWidth(38)
+        self._voice_combo = QComboBox()
+        self._voice_combo.setFixedWidth(160)
+        self._voice_combo.setToolTip("Select TTS voice")
+        self._voice_combo.currentTextChanged.connect(self.voice_changed)
+
         # Progress label (right side)
         self._progress_label = QLabel("")
         self._progress_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
@@ -124,6 +139,9 @@ class ControlsBar(QWidget):
         layout.addWidget(vol_label)
         layout.addWidget(self._vol_slider)
         layout.addWidget(self._vol_val_label)
+        layout.addWidget(sep3)
+        layout.addWidget(voice_label)
+        layout.addWidget(self._voice_combo)
         layout.addStretch()
         layout.addWidget(self._progress_label)
 
@@ -165,6 +183,18 @@ class ControlsBar(QWidget):
     def set_chapter_nav_enabled(self, prev: bool, next_: bool) -> None:
         self._prev_btn.setEnabled(prev)
         self._next_btn.setEnabled(next_)
+
+    def populate_voices(self, voices: list[str], selected: str = "") -> None:
+        self._voice_combo.blockSignals(True)
+        self._voice_combo.clear()
+        self._voice_combo.addItems(voices)
+        if selected and selected in voices:
+            self._voice_combo.setCurrentText(selected)
+        self._voice_combo.blockSignals(False)
+
+    @property
+    def selected_voice(self) -> str:
+        return self._voice_combo.currentText()
 
     @property
     def rate(self) -> int:

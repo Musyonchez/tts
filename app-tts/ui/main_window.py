@@ -18,9 +18,11 @@ from core.fetcher import FetcherThread
 from core.library import (
     ChapterInfo,
     load_chapter_text,
+    load_settings,
     next_chapter,
     prev_chapter,
     save_offline_bookmark,
+    save_settings,
     save_web_bookmark,
 )
 from core.tts_worker import TTSWorker, get_available_voices
@@ -53,6 +55,10 @@ class MainWindow(QMainWindow):
 
         self._build_ui()
         self._wire_signals()
+
+        # Populate voice selector with saved preference
+        saved_voice = load_settings().get("voice", self._pick_voice())
+        self._controls.populate_voices(self._voices, selected=saved_voice)
 
     # ------------------------------------------------------------------
     # UI construction
@@ -115,6 +121,7 @@ class MainWindow(QMainWindow):
         self._controls.next_clicked.connect(self._on_next_chapter)
         self._controls.rate_changed.connect(self._on_rate_changed)
         self._controls.volume_changed.connect(self._on_volume_changed)
+        self._controls.voice_changed.connect(self._on_voice_changed)
 
         # Sidebar
         self._sidebar.chapter_selected.connect(self._on_offline_chapter_selected)
@@ -210,6 +217,9 @@ class MainWindow(QMainWindow):
         self._reader.clear_highlight()
 
     def _pick_voice(self) -> str:
+        selected = self._controls.selected_voice
+        if selected:
+            return selected
         for name in self._voices:
             if "zira" in name.lower():
                 return name
@@ -217,6 +227,9 @@ class MainWindow(QMainWindow):
             if "en-us" in name.lower():
                 return name
         return self._voices[0] if self._voices else ""
+
+    def _on_voice_changed(self, voice: str) -> None:
+        save_settings({"voice": voice})
 
     # ------------------------------------------------------------------
     # Controls callbacks
