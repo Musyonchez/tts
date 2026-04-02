@@ -51,7 +51,7 @@ class LibrarySidebar(QWidget):
 
         self._chapter_list = QListWidget()
         self._chapter_list.setAlternatingRowColors(False)
-        self._chapter_list.itemDoubleClicked.connect(self._on_chapter_double_clicked)
+        self._chapter_list.itemClicked.connect(self._on_chapter_clicked)
 
         layout.addWidget(self._source_combo)
         layout.addWidget(novel_label)
@@ -104,7 +104,7 @@ class LibrarySidebar(QWidget):
             item.setData(Qt.ItemDataRole.UserRole, ch)
             self._chapter_list.addItem(item)
 
-    def _on_chapter_double_clicked(self, item: QListWidgetItem) -> None:
+    def _on_chapter_clicked(self, item: QListWidgetItem) -> None:
         from core.library import ChapterInfo
         ch: ChapterInfo = item.data(Qt.ItemDataRole.UserRole)
         self.chapter_selected.emit(ch)
