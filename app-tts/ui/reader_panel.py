@@ -2,14 +2,26 @@
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor, QFont, QTextBlockFormat, QTextCharFormat, QTextCursor
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QColor, QFont, QMouseEvent, QTextBlockFormat, QTextCharFormat, QTextCursor
 from PyQt6.QtWidgets import QLabel, QTextEdit, QVBoxLayout, QWidget
 
 from .theme import COLORS, PARA_HIGHLIGHT_BG, PARA_HIGHLIGHT_FG
 
 
+class _ClickableTextEdit(QTextEdit):
+    """QTextEdit that emits the character position of each click."""
+    char_clicked = pyqtSignal(int)
+
+    def mousePressEvent(self, e: QMouseEvent) -> None:
+        super().mousePressEvent(e)
+        if e.button() == Qt.MouseButton.LeftButton:
+            cursor = self.cursorForPosition(e.pos())
+            self.char_clicked.emit(cursor.position())
+
+
 class ReaderPanel(QWidget):
+    paragraph_clicked = pyqtSignal(int)  # paragraph index
     def __init__(self, parent=None):
         super().__init__(parent)
         self._para_ranges: list[tuple[int, int]] = []
@@ -26,8 +38,9 @@ class ReaderPanel(QWidget):
         self._title_label.setObjectName("chapterTitle")
         self._title_label.setWordWrap(True)
 
-        self._text_edit = QTextEdit()
+        self._text_edit = _ClickableTextEdit()
         self._text_edit.setReadOnly(True)
+        self._text_edit.char_clicked.connect(self._on_char_clicked)
         self._text_edit.setFont(QFont("Segoe UI", 11))
         self._text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self._text_edit.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -126,6 +139,12 @@ class ReaderPanel(QWidget):
         self._current_para = -1
 
     # ------------------------------------------------------------------
+
+    def _on_char_clicked(self, pos: int) -> None:
+        for i, (start, end) in enumerate(self._para_ranges):
+            if start <= pos <= end:
+                self.paragraph_clicked.emit(i)
+                return
 
     def _apply_format(self, index: int, fmt: QTextCharFormat) -> None:
         start, end = self._para_ranges[index]

@@ -131,6 +131,9 @@ class MainWindow(QMainWindow):
         # Sidebar
         self._sidebar.chapter_selected.connect(self._on_offline_chapter_selected)
 
+        # Reader click-to-seek
+        self._reader.paragraph_clicked.connect(self._on_paragraph_clicked)
+
     # ------------------------------------------------------------------
     # URL fetch workflow
     # ------------------------------------------------------------------
@@ -237,6 +240,10 @@ class MainWindow(QMainWindow):
 
     def _on_voice_changed(self, voice: str) -> None:
         save_settings({"voice": voice})
+
+    def _on_paragraph_clicked(self, index: int) -> None:
+        self._current_para_idx = index
+        self._start_worker(start_index=index)
 
     # ------------------------------------------------------------------
     # Controls callbacks
